@@ -9,12 +9,12 @@ type URLSaver struct {
 	mock.Mock
 }
 
-// SaveUrl provides a mock function with given fields: urlToSave, alias
-func (_m *URLSaver) SaveUrl(urlToSave string, alias string) (int64, error) {
+// SaveURL provides a mock function with given fields: urlToSave, alias
+func (_m *URLSaver) SaveURL(urlToSave string, alias string) (int64, error) {
 	ret := _m.Called(urlToSave, alias)
 
 	if len(ret) == 0 {
-		panic("no return value specified for SaveUrl")
+		panic("no return value specified for SaveURL")
 	}
 
 	var r0 int64
