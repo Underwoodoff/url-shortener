@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
+	ssogrpc "url-shortener/internal/clients/sso/grpc"
 	config "url-shortener/internal/config"
 	"url-shortener/internal/http-server/handlers/redirect"
 	"url-shortener/internal/http-server/handlers/url/save"
@@ -28,6 +30,20 @@ func main() {
 	log.Info("starting url-shortener", slog.String("env", cfg.Env))
 	log.Debug("debug")
 
+	ssoClient, err := ssogrpc.New(
+		context.Background(),
+		log,
+		cfg.Clients.SSO.Address,
+		cfg.Clients.SSO.Timeout,
+		cfg.Clients.SSO.RetriesCount,
+	)
+	if err != nil {
+		log.Error("failed to create sso client", sl.Err(err))
+		os.Exit(1)
+	}
+
+	ssoClient.IsAdmin(context.Background(), 1)
+
 	fmt.Println(cfg)
 
 	storage, err := sqlite.New(cfg.StoragePath)
@@ -35,20 +51,6 @@ func main() {
 		log.Error("failed to initialize storage", sl.Err(err))
 		os.Exit(1)
 	}
-
-	// id, err := storage.SaveURL("https://google.com", "google")
-	// if err != nil {
-	// 	log.Error("failed to save url", sl.Err(err))
-	// 	os.Exit(1)
-	// }
-
-	// log.Info("saved url", slog.Int64("id", id))
-
-	// id, err = storage.SaveURL("https://google.com", "google")
-	// if err != nil {
-	// 	log.Error("failed to save url", sl.Err(err))
-	// 	os.Exit(1)
-	// }
 
 	_ = storage
 	//todo: init router: chi, chi render
